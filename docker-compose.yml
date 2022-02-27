@@ -1,0 +1,59 @@
+version: '2.4'
+
+x-default: &default
+  dns:
+    - 8.8.8.8
+    - 9.9.9.9
+
+x-mysqlenv:
+  - &mysqlUser admin
+  - &mysqlPass ${MYSQL_PASSWORD}
+  - &mysqlDbName ${MYSQLDUMP_DATABASE}
+
+services:
+
+  # Database for testing.
+  db:
+    <<: *default
+    image: mysql:5.7.37
+    ports:
+      - 3306
+    command: ["mysqld"]
+    environment:
+      MYSQL_ROOT_PASSWORD: *mysqlPass
+      MYSQL_DATABASE: *mysqlDbName
+      MYSQL_USER: *mysqlUser
+      MYSQL_PASSWORD: *mysqlPass
+    healthcheck:
+      test: mysqladmin --user=$$MYSQL_USER --password=$$MYSQL_PASSWORD ping -h localhost       # Use $$ for escaping $
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 1m
+    volumes:
+      - mysqldb-data:/var/lib/mysql
+    restart: on-failure
+
+  wiki-backup:
+    <<: *default
+    build:
+      context: .
+      args:
+        # GIT_COMMIT load from .envrc via direnv
+        GIT_COMMIT_ID: ${GIT_COMMIT:-unspecified}
+    image: tamilwiki/mediawiki_backup:dev
+    environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQLDUMP_DATABASE: ${MYSQLDUMP_DATABASE}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      INIT_BACKUP: 1
+      # every 5 min for testing
+      CRON_TIME: "1 * * * *"
+
+volumes:
+  mysqldb-data:
