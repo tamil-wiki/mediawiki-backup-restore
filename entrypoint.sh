@@ -22,6 +22,11 @@ if [[ -z "${MYSQL_PASSWORD}" ]];then
   exit 1
 fi
 
+if [[ -z "${MYSQLDUMP_DATABASE}" ]];then
+  echo "The MYSQLDUMP_DATABASE env can't be empty."
+  exit 1
+fi
+
 if [[ -z "${S3_ACCESS_KEY_ID}" ]];then
   echo "The S3_ACCESS_KEY_ID env can't be empty."
   exit 1

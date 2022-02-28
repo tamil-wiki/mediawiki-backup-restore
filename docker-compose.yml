@@ -41,7 +41,7 @@ services:
       args:
         # GIT_COMMIT load from .envrc via direnv
         GIT_COMMIT_ID: ${GIT_COMMIT:-unspecified}
-    image: tamilwiki/mediawiki_backup:dev
+    image: tamilwiki/mediawiki_backup_restore:dev
     environment:
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PORT: ${MYSQL_PORT}
@@ -52,8 +52,8 @@ services:
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_BUCKET: ${S3_BUCKET}
       INIT_BACKUP: 1
-      # every 5 min for testing
-      CRON_TIME: "1 * * * *"
+      # every 5 min for dev testing
+      CRON_TIME: "*/5 * * * *"
 
 volumes:
   mysqldb-data:
