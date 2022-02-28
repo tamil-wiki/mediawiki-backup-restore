@@ -11,7 +11,12 @@ copy_s3 () {
   fi
 
   echo "Uploading ${DEST_FILE} on S3..."
-  cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE
+  if [[ -z "$S3_PREFIX" ]]
+    # backup without prefix
+    cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$DEST_FILE
+  else
+    cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE
+  fi
   if [ "$?" == "0" ]; then
     rm -f $SRC_FILE
   else
