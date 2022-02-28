@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+# set -e
 
 copy_s3 () {
   SRC_FILE=$1
@@ -11,7 +12,7 @@ copy_s3 () {
   fi
 
   echo "Uploading ${DEST_FILE} on S3..."
-  if [[ -z "$S3_PREFIX" ]]
+  if [[ -z "$S3_PREFIX" ]]; then
     # backup without prefix
     cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$DEST_FILE
   else

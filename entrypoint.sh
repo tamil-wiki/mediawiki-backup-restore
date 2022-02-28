@@ -62,9 +62,7 @@ if [[ "$1" == "backup" ]]; then
   crontab /tmp/crontab.conf
   echo "Running cron task manager in foreground"
   exec crond -f -L /dev/stdout
-fi
-
-if [[ "$1" == "restore" ]]; then
+elif [[ "$1" == "restore" ]]; then
   # Check connectivity
   dockerize -wait tcp://${MYSQL_HOST}:${MYSQL_PORT} -timeout ${TIMEOUT}
   # Restore at start up
