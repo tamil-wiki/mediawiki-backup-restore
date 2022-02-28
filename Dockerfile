@@ -36,7 +36,6 @@ ENV S3_BUCKET ""
 ENV S3_ENDPOINT ""
 ENV S3_PREFIX "wiki"
 ENV S3_REGION "us-west-1"
-ENV S3_S3V4 "no"
 ENV S3_SECRET_ACCESS_KEY ""
 ENV TIMEOUT "30s"
 
@@ -44,4 +43,6 @@ COPY ["entrypoint.sh", "backup.sh", "/"]
 
 VOLUME ["/backup"]
 
-CMD dockerize -wait tcp://${MYSQL_HOST}:${MYSQL_PORT} -timeout ${TIMEOUT} /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
+
+CMD [ "backup" ]

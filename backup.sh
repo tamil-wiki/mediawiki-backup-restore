@@ -23,13 +23,6 @@ MYSQL_HOST_OPTS="-h $MYSQL_HOST -P $MYSQL_PORT -u$MYSQL_USER -p$MYSQL_PASSWORD"
 DUMP_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
 BACKUP_DIR="/backup"
 
-# env files needed for aws cli
-export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
-if [[ ! -z "$S3_REGION" ]]; then
-  export AWS_DEFAULT_REGION=$S3_REGION
-fi
-
 echo "Backup is started at ${DUMP_START_TIME}"
 echo "Creating dump for ${MYSQLDUMP_DATABASE} from ${MYSQL_HOST}..."
 DUMP_FILE="$BACKUP_DIR/$DUMP_START_TIME.dump.sql.gz"

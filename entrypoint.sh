@@ -42,13 +42,34 @@ if [[ -z "${S3_BUCKET}" ]];then
   exit 1
 fi
 
-# Backup at start up
-if [[ "${INIT_BACKUP}" -gt "0" ]]; then
-  echo "Create a backup on the startup"
-  /backup.sh
+# env files needed for aws cli
+export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
+if [[ ! -z "$S3_REGION" ]]; then
+  export AWS_DEFAULT_REGION=$S3_REGION
 fi
 
-echo "${CRON_TIME} bash /backup.sh 2>&1 >> /dev/stdout" > /tmp/crontab.conf
-crontab /tmp/crontab.conf
-echo "Running cron task manager in foreground"
-exec crond -f -L /dev/stdout
+if [[ "$1" == "backup" ]]; then
+  # Check connectivity
+  dockerize -wait tcp://${MYSQL_HOST}:${MYSQL_PORT} -timeout ${TIMEOUT}
+  # Backup at start up
+  if [[ "${INIT_BACKUP}" -gt "0" ]]; then
+    echo "Create a backup on the startup"
+    /backup.sh
+  fi
+
+  echo "${CRON_TIME} bash /backup.sh 2>&1 >> /dev/stdout" > /tmp/crontab.conf
+  crontab /tmp/crontab.conf
+  echo "Running cron task manager in foreground"
+  exec crond -f -L /dev/stdout
+fi
+
+if [[ "$1" == "restore" ]]; then
+  # Check connectivity
+  dockerize -wait tcp://${MYSQL_HOST}:${MYSQL_PORT} -timeout ${TIMEOUT}
+  # Restore at start up
+  # TODO: AV
+fi
+
+# assume user want to run his own process, for example a `bash` shell to explore this image
+exec "$@"
