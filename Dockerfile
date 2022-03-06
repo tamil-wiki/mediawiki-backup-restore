@@ -39,7 +39,7 @@ ENV S3_REGION "us-west-1"
 ENV S3_SECRET_ACCESS_KEY ""
 ENV TIMEOUT "30s"
 
-COPY ["entrypoint.sh", "backup.sh", "/"]
+COPY ["entrypoint.sh", "backup.sh", "restore.sh", "/"]
 
 VOLUME ["/backup"]
 

@@ -4,6 +4,7 @@
 copy_s3 () {
   SRC_FILE=$1
   DEST_FILE=$2
+  DEST_LATEST_FILE="latest.${DEST_FILE#*.}"
 
   if [[ -z "$S3_ENDPOINT" ]]; then
     AWS_ARGS=""
@@ -14,9 +15,11 @@ copy_s3 () {
   echo "Uploading ${DEST_FILE} on S3..."
   if [[ -z "$S3_PREFIX" ]]; then
     # backup without prefix
-    cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$DEST_FILE
+    aws $AWS_ARGS s3 cp $SRC_FILE s3://$S3_BUCKET/$DEST_FILE && \
+    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$DEST_FILE s3://$S3_BUCKET/$DEST_LATEST_FILE
   else
-    cat $SRC_FILE | aws $AWS_ARGS s3 cp - s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE
+    aws $AWS_ARGS s3 cp $SRC_FILE s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE && \
+    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$DEST_FILE s3://$S3_BUCKET/$S3_PREFIX/$DEST_LATEST_FILE
   fi
   if [ "$?" == "0" ]; then
     rm -f $SRC_FILE
@@ -39,6 +42,21 @@ if [ "$?" == "0" ]; then
   copy_s3 $DUMP_FILE $S3_FILE
 else
   echo "Error creating mysqldump"
+fi
+
+MEDIAWIKI_FOLDER="/mediawiki"
+DUMP_FILE="$BACKUP_DIR/$DUMP_START_TIME.mediawiki.tar.gz"
+# backup mediawiki folder
+if [ -d $MEDIAWIKI_FOLDER ]; then
+  echo "Creating $DUMP_FILE from $MEDIAWIKI_FOLDER"
+  # Gzip mediawiki folder
+  tar -czf $DUMP_FILE $MEDIAWIKI_FOLDER
+  if [ "$?" == "0" ]; then
+    S3_FILE="$DUMP_START_TIME.mediawiki.tar.gz"
+    copy_s3 $DUMP_FILE $S3_FILE
+  else
+    echo "Error creating mediawiki"
+  fi
 fi
 
 DUMP_END_TIME=$(date +"%Y-%m-%dT%H%M%SZ")

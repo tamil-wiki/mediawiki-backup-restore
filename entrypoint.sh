@@ -66,7 +66,8 @@ elif [[ "$1" == "restore" ]]; then
   # Check connectivity
   dockerize -wait tcp://${MYSQL_HOST}:${MYSQL_PORT} -timeout ${TIMEOUT}
   # Restore at start up
-  # TODO: AV
+  source /restore.sh
+  list_s3
 fi
 
 # assume user want to run his own process, for example a `bash` shell to explore this image
