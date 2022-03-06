@@ -27,9 +27,9 @@ _s3_key_exists() {
 
 list_s3_top_ten() {
   if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$(date +"%Y-%m-%d") --human-readable | sort -r | tail -n 10
+    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
   else
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/$(date +"%Y-%m-%d") --human-readable | sort -r | tail -n 10
+    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
   fi
 }
 
@@ -69,9 +69,8 @@ restore_mediawiki() {
   else
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_FILE
   fi
-  mkdir -p $RESTORE_DIR/extracted
-  tar -xzvf $RESTORE_FILE -C $RESTORE_DIR/extracted
-  mv $RESTORE_DIR/extracted/mediawiki $MEDIAWIKI_DIR
+
+  tar -xzvf $RESTORE_FILE -C $(dirname $MEDIAWIKI_DIR)
 
   if [ "$?" == "0" ]; then
     echo "Restoring Mediawiki $1 success!"

@@ -50,7 +50,7 @@ DUMP_FILE="$BACKUP_DIR/$DUMP_START_TIME.mediawiki.tar.gz"
 if [ -d $MEDIAWIKI_DIR ]; then
   echo "Creating $DUMP_FILE from $MEDIAWIKI_DIR"
   # Gzip mediawiki folder
-  tar -czf $DUMP_FILE $MEDIAWIKI_DIR
+  tar -czf $DUMP_FILE -C $(dirname $MEDIAWIKI_DIR) $(basename $MEDIAWIKI_DIR)
   if [ "$?" == "0" ]; then
     S3_FILE="$DUMP_START_TIME.mediawiki.tar.gz"
     copy_s3 $DUMP_FILE $S3_FILE
