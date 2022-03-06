@@ -76,7 +76,7 @@ restore_latest() {
 }
 
 restore() {
-  # The fileName will be with out extensions. like 2022-03-06T063500Z or latest
+  # The fileName will be without extensions like 2022-03-06T075000Z or latest
   fileName=$1
   RESTORE_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
   echo "Restoring Started at $RESTORE_START_TIME"
