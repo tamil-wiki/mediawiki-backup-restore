@@ -46,6 +46,8 @@ S3_REGION - Default is us-west-1
 
 CRON_TIME - Default is "0 */1 * * *". Runs every hour 0th min.
 
+INIT_BACKUP - To run backup at startup. Default is 0 disabled.
+
 
 This will backup MySQL database and everything in `/mediawiki` mounted folder.
 
@@ -74,6 +76,8 @@ bash-5.1#
 The required env with above is
 
 RESTORE_DATABASE
+
+### Commands
 
 The available commands are
 

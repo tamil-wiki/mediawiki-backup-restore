@@ -63,12 +63,22 @@ restore_db() {
 
 restore_mediawiki() {
   echo "Restoring Mediawiki ..."
+  RESTORE_FILE=$RESTORE_DIR/$1
   if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$1 $RESTORE_DIR/$1
+    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$1 $RESTORE_FILE
   else
-    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_DIR/$1
+    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_FILE
   fi
-  tar -xzvf $RESTORE_DIR/$1 $MEDIAWIKI_DIR
+  mkdir -p $RESTORE_DIR/extracted
+  tar -xzvf $RESTORE_FILE -C $RESTORE_DIR/extracted
+  mv $RESTORE_DIR/extracted/mediawiki $MEDIAWIKI_DIR
+
+  if [ "$?" == "0" ]; then
+    echo "Restoring Mediawiki $1 success!"
+    rm -rf $RESTORE_FILE
+  else
+    echo "Restoring Mediawiki $1 failed"
+  fi
 }
 
 restore_latest() {
