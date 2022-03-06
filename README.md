@@ -20,20 +20,30 @@ docker-compose up -d wiki-backup
 The **required environmental** variables are
 
 MYSQL_HOST - Host or IP address of MySQL instance
+
 MYSQL_USER
+
 MYSQL_PORT
+
 MYSQLDUMP_DATABASE - Database to backup
+
 S3_ACCESS_KEY_ID
+
 S3_SECRET_ACCESS_KEY
+
 S3_BUCKET - Bucket name
 
 
-**Optionals are**
+**Optionals** are
 
 MYSQL_PORT - Default 3306.
+
 S3_ENDPOINT - Use this respective endpoint if its [minio](https://min.io/) or [digitalocean spaces](https://www.digitalocean.com/products/spaces)
+
 S3_PREFIX - Mention this different folder from the root
+
 S3_REGION - Default is us-west-1
+
 CRON_TIME - Default is "0 */1 * * *". Runs every hour 0th min.
 
 
