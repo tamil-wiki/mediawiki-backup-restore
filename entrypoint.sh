@@ -22,11 +22,6 @@ if [[ -z "${MYSQL_PASSWORD}" ]];then
   exit 1
 fi
 
-if [[ -z "${MYSQLDUMP_DATABASE}" ]];then
-  echo "The MYSQLDUMP_DATABASE env can't be empty."
-  exit 1
-fi
-
 if [[ -z "${S3_ACCESS_KEY_ID}" ]];then
   echo "The S3_ACCESS_KEY_ID env can't be empty."
   exit 1
@@ -50,6 +45,12 @@ if [[ ! -z "$S3_REGION" ]]; then
 fi
 
 if [[ "$1" == "backup" ]]; then
+
+  if [[ -z "${MYSQLDUMP_DATABASE}" ]];then
+    echo "The MYSQLDUMP_DATABASE env can't be empty."
+    exit 1
+  fi
+
   # Check connectivity
   dockerize -wait tcp://${MYSQL_HOST}:${MYSQL_PORT} -timeout ${TIMEOUT}
   # Backup at start up
@@ -63,11 +64,26 @@ if [[ "$1" == "backup" ]]; then
   echo "Running cron task manager in foreground"
   exec crond -f -L /dev/stdout
 elif [[ "$1" == "restore" ]]; then
+
+  if [[ -z "${RESTORE_DATABASE}" ]];then
+    echo "The RESTORE_DATABASE env can't be empty."
+    exit 1
+  fi
+
   # Check connectivity
   dockerize -wait tcp://${MYSQL_HOST}:${MYSQL_PORT} -timeout ${TIMEOUT}
   # Restore at start up
   source /restore.sh
-  list_s3
+  list_s3_top_ten
+
+  if [[ "${INIT_RESTORE}" -gt "0" ]]; then
+    restore_latest
+    exit 0
+  fi
+  # By default restoring is a manual activity
+  echo "#! /usr/bin/env bash" > /root/.bashrc
+  echo "source /restore.sh" >> /root/.bashrc
+  exec bash
 fi
 
 # assume user want to run his own process, for example a `bash` shell to explore this image

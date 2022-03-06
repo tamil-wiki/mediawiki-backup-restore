@@ -44,13 +44,13 @@ else
   echo "Error creating mysqldump"
 fi
 
-MEDIAWIKI_FOLDER="/mediawiki"
+MEDIAWIKI_DIR="/mediawiki"
 DUMP_FILE="$BACKUP_DIR/$DUMP_START_TIME.mediawiki.tar.gz"
 # backup mediawiki folder
-if [ -d $MEDIAWIKI_FOLDER ]; then
-  echo "Creating $DUMP_FILE from $MEDIAWIKI_FOLDER"
+if [ -d $MEDIAWIKI_DIR ]; then
+  echo "Creating $DUMP_FILE from $MEDIAWIKI_DIR"
   # Gzip mediawiki folder
-  tar -czf $DUMP_FILE $MEDIAWIKI_FOLDER
+  tar -czf $DUMP_FILE $MEDIAWIKI_DIR
   if [ "$?" == "0" ]; then
     S3_FILE="$DUMP_START_TIME.mediawiki.tar.gz"
     copy_s3 $DUMP_FILE $S3_FILE
