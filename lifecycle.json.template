@@ -13,7 +13,7 @@
         "DaysAfterInitiation": 1
       },
       "ID": "Remove uncompleted uploads.",
-      "Prefix": "${S3_PREFIX}",
+      "Prefix": "",
       "Status": "Enabled"
     }
   ]

@@ -48,6 +48,8 @@ CRON_TIME - Default is "0 */1 * * *". Runs every hour 0th min.
 
 INIT_BACKUP - To run backup at startup. Default is 0 disabled.
 
+S3_LIFECYCLE_EXPIRATION_DAYS - To set the s3 lifecycle expiration days. Default is 0 disabled. More [info](https://docs.aws.amazon.com/cli/latest/reference/s3api/put-bucket-lifecycle.html)
+
 
 This will backup MySQL database and everything in `/mediawiki` mounted folder.
 
