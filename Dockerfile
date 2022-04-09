@@ -9,10 +9,10 @@ RUN apk add --no-cache --update \
       openssl \
       curl \
       python3 \
-      py3-pip && \
+      py3-pip \
+      gettext && \
       pip3 install --no-cache-dir \
       awscli && \
-      gettext-base && \
       # mariadb-connector-c && \
       rm -rf /var/cache/apk/*
 
