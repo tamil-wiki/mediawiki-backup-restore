@@ -1,0 +1,20 @@
+{
+  "Rules": [
+    {
+      "Expiration": {
+        "Days": ${S3_LIFECYCLE_EXPIRATION_DAYS}
+      },
+      "ID": "Delete older than ${S3_LIFECYCLE_EXPIRATION_DAYS} days.",
+      "Prefix": "${S3_PREFIX}",
+      "Status": "Enabled"
+    },
+    {
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 1
+      },
+      "ID": "Remove uncompleted uploads.",
+      "Prefix": "${S3_PREFIX}",
+      "Status": "Enabled"
+    }
+  ]
+}

@@ -12,6 +12,7 @@ RUN apk add --no-cache --update \
       py3-pip && \
       pip3 install --no-cache-dir \
       awscli && \
+      gettext-base && \
       # mariadb-connector-c && \
       rm -rf /var/cache/apk/*
 
@@ -36,9 +37,10 @@ ENV S3_ENDPOINT ""
 ENV S3_PREFIX ""
 ENV S3_REGION "us-west-1"
 ENV S3_SECRET_ACCESS_KEY ""
+ENV S3_LIFECYCLE_EXPIRATION_DAYS ""
 ENV TIMEOUT "30s"
 
-COPY ["entrypoint.sh", "backup.sh", "restore.sh", "/"]
+COPY ["entrypoint.sh", "backup.sh", "restore.sh", "lifecycle.json.template", "/"]
 
 VOLUME ["/backup"]
 
