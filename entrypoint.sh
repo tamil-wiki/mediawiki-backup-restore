@@ -59,6 +59,19 @@ if [[ "$1" == "backup" ]]; then
     /backup.sh
   fi
 
+  if [[ -z "$S3_ENDPOINT" ]]; then
+    AWS_ARGS=""
+  else
+    AWS_ARGS="--endpoint-url $S3_ENDPOINT"
+  fi
+
+  # Setup bucket expiration policy
+  if [[ "${S3_LIFECYCLE_EXPIRATION_DAYS}" -gt "0" ]]; then
+    envsubst < /lifecycle.json.template > /lifecycle.json
+    aws $AWS_ARGS s3api put-bucket-lifecycle --bucket $S3_BUCKET --lifecycle-configuration file://lifecycle.json
+    aws $AWS_ARGS s3api get-bucket-lifecycle --bucket $S3_BUCKET
+  fi
+
   echo "${CRON_TIME} bash /backup.sh 2>&1 >> /dev/stdout" > /tmp/crontab.conf
   crontab /tmp/crontab.conf
   echo "Running cron task manager in foreground"
