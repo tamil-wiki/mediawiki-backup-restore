@@ -43,17 +43,35 @@ list_s3() {
 
 restore_db() {
   echo "Restoring DB $RESTORE_DATABASE ..."
+  success="1"
   MYSQL_HOST_OPTS="-h $MYSQL_HOST -P $MYSQL_PORT -u$MYSQL_USER -p$MYSQL_PASSWORD"
-  # Create database and grant permissions
-  echo "DROP DATABASE IF EXISTS ${RESTORE_DATABASE}; CREATE DATABASE ${RESTORE_DATABASE}; GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}' WITH GRANT OPTION; FLUSH PRIVILEGES;" | mysql $MYSQL_HOST_OPTS
+  # Drop all tables if exists
+
+  echo \
+    "SET FOREIGN_KEY_CHECKS = 0;" \
+    $(mysqldump --add-drop-table --no-data $MYSQL_HOST_OPTS $RESTORE_DATABASE | grep 'DROP TABLE') \
+    "SET FOREIGN_KEY_CHECKS = 1;" \
+  | mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE
 
   if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$1 - | gzip -dc | mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE
+    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$1 $RESTORE_DIR
   else
-    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 - | gzip -dc | mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE
+    aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_DIR
   fi
 
-  if [ "$?" == "0" ]; then
+  if [[ -f $RESTORE_DIR/$1 ]]; then
+    # TODO: Not working in mariadb
+    echo "SET SESSION SQL_REQUIRE_PRIMARY_KEY = OFF;$(gzip -dc $RESTORE_DIR/$1)" > $RESTORE_DIR/dump.sql
+    mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE < $RESTORE_DIR/dump.sql
+    if [ "$?" == "0" ]; then
+      success="0"
+    fi
+    rm -rf $RESTORE_DIR/$1 $RESTORE_DIR/dump.sql
+  else
+    echo "File $1 not exits."
+  fi
+
+  if [ "$success" == "0" ]; then
     echo "Restoring DB $RESTORE_DATABASE success!"
   else
     echo "Restoring DB $RESTORE_DATABASE failed"

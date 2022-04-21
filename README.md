@@ -102,10 +102,21 @@ Restoring Ends at 2022-03-06T155144Z
 
 ```
 
+### To validate the restore
+
+Set your S3 credentials in .env file. Then
+
+```
+docker-compose up -d db
+docker-compose run --rm -e "RESTORE_DATABASE=my_wiki" wiki-backup restore
+```
+
+Then exec into the restore container
+
 ### To override anything on restore
 
 ```bash
-docker-compose run -e "RESTORE_DATABASE=new_my_wiki" -v "/var/www/html:/mediawiki" wiki-backup restore
+docker-compose run --rm -e "RESTORE_DATABASE=new_my_wiki" -v "/var/www/html:/mediawiki" wiki-backup restore
 ```
 
 Refer
