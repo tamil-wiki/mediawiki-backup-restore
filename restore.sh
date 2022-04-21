@@ -60,6 +60,7 @@ restore_db() {
   fi
 
   if [[ -f $RESTORE_DIR/$1 ]]; then
+    # TODO: Not working in mariadb
     echo "SET SESSION SQL_REQUIRE_PRIMARY_KEY = OFF;$(gzip -dc $RESTORE_DIR/$1)" > $RESTORE_DIR/dump.sql
     mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE < $RESTORE_DIR/dump.sql
     if [ "$?" == "0" ]; then
