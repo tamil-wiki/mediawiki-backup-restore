@@ -62,6 +62,12 @@ restore_db() {
 
   if [[ -f $RESTORE_DIR/$1 ]]; then
     echo "${MYSQL_RESTORE_OPTIONS}$(gzip -dc $RESTORE_DIR/$1)" > $RESTORE_DIR/dump.sql
+    collationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT collation_name FROM information_schema.COLLATIONS WHERE collation_name='utf8mb4_0900_ai_ci';")
+    if [[ -z $collationName ]]; then
+      sed -i 's/utf8mb4_0900_ai_ci/utf8_general_ci/g' $RESTORE_DIR/dump.sql
+      sed -i 's/CHARSET=utf8mb4/CHARSET=utf8/g' $RESTORE_DIR/dump.sql
+    fi
+
     mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE < $RESTORE_DIR/dump.sql
     if [ "$?" == "0" ]; then
       success="0"
