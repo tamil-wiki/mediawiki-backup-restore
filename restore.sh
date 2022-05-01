@@ -42,6 +42,7 @@ list_s3() {
 }
 
 restore_db() {
+  mkdir -p $RESTORE_DIR
   echo "Restoring DB $RESTORE_DATABASE ..."
   success="1"
   MYSQL_HOST_OPTS="-h $MYSQL_HOST -P $MYSQL_PORT -u$MYSQL_USER -p$MYSQL_PASSWORD"
@@ -60,8 +61,13 @@ restore_db() {
   fi
 
   if [[ -f $RESTORE_DIR/$1 ]]; then
-    # TODO: Not working in mariadb
-    echo "SET SESSION SQL_REQUIRE_PRIMARY_KEY = OFF;$(gzip -dc $RESTORE_DIR/$1)" > $RESTORE_DIR/dump.sql
+    echo "${MYSQL_RESTORE_OPTIONS}$(gzip -dc $RESTORE_DIR/$1)" > $RESTORE_DIR/dump.sql
+    collationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT collation_name FROM information_schema.COLLATIONS WHERE collation_name='utf8mb4_0900_ai_ci';")
+    if [[ -z $collationName ]]; then
+      sed -i 's/utf8mb4_0900_ai_ci/utf8_general_ci/g' $RESTORE_DIR/dump.sql
+      sed -i 's/CHARSET=utf8mb4/CHARSET=utf8/g' $RESTORE_DIR/dump.sql
+    fi
+
     mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE < $RESTORE_DIR/dump.sql
     if [ "$?" == "0" ]; then
       success="0"
@@ -80,6 +86,7 @@ restore_db() {
 }
 
 restore_mediawiki() {
+  mkdir -p $RESTORE_DIR
   echo "Restoring Mediawiki ..."
   RESTORE_FILE=$RESTORE_DIR/$1
   if [[ -z "$S3_PREFIX" ]]; then

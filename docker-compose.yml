@@ -49,6 +49,9 @@ services:
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_PORT: ${MYSQL_PORT}
+      # The content in this env append while restoring the SQL file.
+      # Some older MySQL Server needs extra options has to be enabled.
+      MYSQL_RESTORE_OPTIONS: ""
       MYSQL_USER: ${MYSQL_USER}
       MYSQLDUMP_DATABASE: ${MYSQLDUMP_DATABASE}
       RESTORE_DATABASE: ${MYSQLDUMP_DATABASE}
