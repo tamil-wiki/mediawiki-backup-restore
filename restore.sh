@@ -146,4 +146,3 @@ restore() {
   RESTORE_END_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
   echo "Restoring Ends at $RESTORE_END_TIME"
 }
-
