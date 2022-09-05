@@ -61,7 +61,9 @@ restore_db() {
   fi
 
   if [[ -f $RESTORE_DIR/$1 ]]; then
-    echo "${MYSQL_RESTORE_OPTIONS}$(gzip -dc $RESTORE_DIR/$1)" > $RESTORE_DIR/dump.sql
+    echo "${MYSQL_RESTORE_OPTIONS}" > $RESTORE_DIR/options.sql
+    gzip -dkc $RESTORE_DIR/$1 > $RESTORE_DIR/content.sql
+    cat $RESTORE_DIR/options.sql $RESTORE_DIR/content.sql > $RESTORE_DIR/dump.sql
 
     defaultCollationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@collation_database;")
     defaultCharset=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@character_set_database;")
@@ -82,7 +84,7 @@ restore_db() {
     if [ "$?" == "0" ]; then
       success="0"
     fi
-    rm -rf $RESTORE_DIR/$1 $RESTORE_DIR/dump.sql
+    rm -rf $RESTORE_DIR/$1 $RESTORE_DIR/dump.sql $RESTORE_DIR/content.sql $RESTORE_DIR/options.sql
   else
     echo "File $1 not exits."
   fi
