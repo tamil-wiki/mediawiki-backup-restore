@@ -34,8 +34,11 @@ BACKUP_DIR="/backup"
 
 echo "Backup is started at ${DUMP_START_TIME}"
 echo "Creating dump for ${MYSQLDUMP_DATABASE} from ${MYSQL_HOST}..."
-DUMP_FILE="$BACKUP_DIR/$DUMP_START_TIME.dump.sql.gz"
-mysqldump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS $MYSQLDUMP_DATABASE | gzip > $DUMP_FILE
+DUMP_SQL_FILE="$BACKUP_DIR/$DUMP_START_TIME.dump.sql"
+DUMP_FILE="$DUMP_SQL_FILE.gz"
+mysqldump --single-transaction $MYSQLDUMP_OPTIONS $MYSQL_HOST_OPTS $MYSQL_SSL_OPTS $MYSQLDUMP_DATABASE > $DUMP_SQL_FILE
+echo "Compressing $DUMP_SQL_FILE"
+gzip -f "$DUMP_SQL_FILE"
 
 if [ "$?" == "0" ]; then
   S3_FILE="$DUMP_START_TIME.dump.sql.gz"
