@@ -56,7 +56,7 @@ if [[ "$1" == "backup" ]]; then
   # Backup at start up
   if [[ "${INIT_BACKUP}" -gt "0" ]]; then
     echo "Create a backup on the startup"
-    /backup.sh
+    /backup.sh daily
   fi
 
   if [[ -z "$S3_ENDPOINT" ]]; then
