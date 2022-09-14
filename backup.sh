@@ -58,7 +58,7 @@ if [ -d $MEDIAWIKI_DIR ]; then
   tar -czf $DUMP_FILE -C $(dirname $MEDIAWIKI_DIR) $(basename $MEDIAWIKI_DIR)
   if [ "$?" == "0" ]; then
     S3_FILE="$DUMP_START_TIME.mediawiki.tar.gz"
-    copy_s3 $DUMP_FILE $S3_FILE
+    copy_s3 $DUMP_FILE $S3_FILE $FREQUENCY
   else
     echo "Error creating mediawiki"
   fi
