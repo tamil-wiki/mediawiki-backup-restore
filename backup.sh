@@ -43,7 +43,7 @@ echo "Compressing $DUMP_SQL_FILE"
 gzip -f "$DUMP_SQL_FILE"
 
 if [ "$?" == "0" ]; then
-  S3_FILE="$DUMP_START_TIME.dump.sql.gz"
+  S3_FILE="$DUMP_START_TIME.$FREQUENCY.dump.sql.gz"
   copy_s3 $DUMP_FILE $S3_FILE $FREQUENCY
 else
   echo "Error creating mysqldump"
@@ -57,7 +57,7 @@ if [ -d $MEDIAWIKI_DIR ]; then
   # Gzip mediawiki folder
   tar -czf $DUMP_FILE -C $(dirname $MEDIAWIKI_DIR) $(basename $MEDIAWIKI_DIR)
   if [ "$?" == "0" ]; then
-    S3_FILE="$DUMP_START_TIME.mediawiki.tar.gz"
+    S3_FILE="$DUMP_START_TIME.$FREQUENCY.mediawiki.tar.gz"
     copy_s3 $DUMP_FILE $S3_FILE $FREQUENCY
   else
     echo "Error creating mediawiki"
