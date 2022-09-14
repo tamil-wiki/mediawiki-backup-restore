@@ -22,8 +22,15 @@ RUN chmod +x /usr/local/bin/dockerize
 ARG GIT_COMMIT_ID=unspecified
 ENV GIT_COMMIT_ID=$GIT_COMMIT_ID
 
-# Every hour at 0th min
-ENV CRON_TIME "0 */1 * * *"
+
+# CRON_TIME_HOURLY = 0 */1 * * * (every 1 hour)
+# CRON_TIME_DAILY = 0 */24 * * * (every 24 hours)
+# CRON_TIME_WEEKLY = 0 3 * * SUN (3am on SUNDAY)
+# CRON_TIME_MONTLY = 0 4 1 * * (4am on 1st of every month)
+ENV CRON_TIME_HOURLY: "0 */1 * * *"
+ENV CRON_TIME_DAILY: "0 */24 * * *"
+ENV CRON_TIME_WEEKLY: "0 3 * * SUN"
+ENV CRON_TIME_MONTLY: "0 4 1 * *"
 ENV MYSQL_HOST "mysql"
 ENV MYSQL_PASSWORD "secret"
 ENV MYSQL_PORT "3306"

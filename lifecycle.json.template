@@ -2,10 +2,34 @@
   "Rules": [
     {
       "Expiration": {
-        "Days": ${S3_LIFECYCLE_EXPIRATION_DAYS}
+        "Days": ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_HOURLY_BACKUP}
       },
-      "ID": "Delete older than ${S3_LIFECYCLE_EXPIRATION_DAYS} days.",
-      "Prefix": "${S3_PREFIX}",
+      "ID": "Delete older than ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_HOURLY_BACKUP} days.",
+      "Prefix": "${S3_PREFIX}/hourly/",
+      "Status": "Enabled"
+    },
+    {
+      "Expiration": {
+        "Days": ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_DAILY_BACKUP}
+      },
+      "ID": "Delete older than ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_DAILY_BACKUP} days.",
+      "Prefix": "${S3_PREFIX}/daily/",
+      "Status": "Enabled"
+    },
+    {
+      "Expiration": {
+        "Days": ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_WEEKLY_BACKUP}
+      },
+      "ID": "Delete older than ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_WEEKLY_BACKUP} days.",
+      "Prefix": "${S3_PREFIX}/weekly/",
+      "Status": "Enabled"
+    },
+    {
+      "Expiration": {
+        "Days": ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_MONTHLY_BACKUP}
+      },
+      "ID": "Delete older than ${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_MONTHLY_BACKUP} days.",
+      "Prefix": "${S3_PREFIX}/monthly/",
       "Status": "Enabled"
     },
     {
