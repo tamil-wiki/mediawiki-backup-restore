@@ -66,7 +66,7 @@ if [[ "$1" == "backup" ]]; then
   fi
 
   # Setup bucket expiration policy
-  if [[ "${S3_LIFECYCLE_EXPIRATION_DAYS}" -gt "0" ]]; then
+  if [[ "${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_HOURLY_BACKUP}" -gt "0" ]]; then
     envsubst < /lifecycle.json.template > /lifecycle.json
     aws $AWS_ARGS s3api put-bucket-lifecycle --bucket $S3_BUCKET --lifecycle-configuration file://lifecycle.json
     aws $AWS_ARGS s3api get-bucket-lifecycle --bucket $S3_BUCKET
