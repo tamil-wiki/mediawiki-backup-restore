@@ -58,11 +58,11 @@ restore_db() {
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$1 $RESTORE_DIR
   else
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_DIR
-  fi
-
-  if [[ -f $RESTORE_DIR/$1 ]]; then
+  fi  
+  RESTORE_FILE=$(basename $1)
+  if [[ -f $RESTORE_DIR/$RESTORE_FILE ]]; then
     echo "${MYSQL_RESTORE_OPTIONS}" > $RESTORE_DIR/options.sql
-    gzip -dkc $RESTORE_DIR/$1 > $RESTORE_DIR/content.sql
+    gzip -dkc $RESTORE_DIR/$RESTORE_FILE > $RESTORE_DIR/content.sql
     cat $RESTORE_DIR/options.sql $RESTORE_DIR/content.sql > $RESTORE_DIR/dump.sql
 
     defaultCollationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@collation_database;")
@@ -84,7 +84,7 @@ restore_db() {
     if [ "$?" == "0" ]; then
       success="0"
     fi
-    rm -rf $RESTORE_DIR/$1 $RESTORE_DIR/dump.sql $RESTORE_DIR/content.sql $RESTORE_DIR/options.sql
+    rm -rf $RESTORE_DIR/$RESTORE_FILE $RESTORE_DIR/dump.sql $RESTORE_DIR/content.sql $RESTORE_DIR/options.sql
   else
     echo "File $1 not exits."
   fi
@@ -111,7 +111,7 @@ restore_mediawiki() {
 
   if [ "$?" == "0" ]; then
     echo "Restoring Mediawiki $1 success!"
-    rm -rf $RESTORE_FILE
+  #  rm -rf $RESTORE_FILE # for testing 
   else
     echo "Restoring Mediawiki $1 failed"
   fi
