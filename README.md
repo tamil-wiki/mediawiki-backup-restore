@@ -110,6 +110,13 @@ Restoring Ends at 2022-03-06T155144Z
 
 ```
 
+If you want to restore any other backup from weekly/daily/hourly folders, you can prefix it. 
+
+```bash
+list_s3 daily
+restore daily/2022-09-27T154250Z.daily 
+```
+
 ### To validate the restore
 
 Set your S3 credentials in .env file. Then
