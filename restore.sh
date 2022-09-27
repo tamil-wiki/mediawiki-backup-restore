@@ -119,7 +119,7 @@ restore_mediawiki() {
 
   if [ "$?" == "0" ]; then
     echo "Restoring Mediawiki $1 success!"
-  #  rm -rf $RESTORE_FILE # for testing 
+    rm -rf $RESTORE_FILE # for testing 
   else
     echo "Restoring Mediawiki $1 failed"
   fi
