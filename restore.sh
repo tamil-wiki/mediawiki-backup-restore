@@ -118,7 +118,7 @@ restore_mediawiki() {
 }
 
 restore_latest() {
-  restore "latest"
+  restore "latest.hourly"
 }
 
 restore() {
