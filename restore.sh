@@ -33,13 +33,21 @@ list_s3_top_ten() {
   fi
 }
 
-list_s3() {
-  if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/ --human-readable
+list_s3() {                                                                                                   
+  if [[ -z "$S3_PREFIX" ]]; then                                                                              
+     S3_PATH= "s3://$S3_BUCKET/"
   else
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/ --human-readable
+    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX/"
   fi
-}
+
+  if [[ -z "$1" ]]; then          
+    S3_PATH="$S3_PATH"
+  else                                                                          
+    S3_PATH="$S3_PATH$1/"
+  fi 
+  echo "Listing files from $S3_PATH" 
+  aws $AWS_ARGS s3 ls $S3_PATH --human-readable                                                                                              
+}  
 
 restore_db() {
   mkdir -p $RESTORE_DIR
