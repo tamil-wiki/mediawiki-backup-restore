@@ -45,7 +45,7 @@ S3_PREFIX - Mention this different folder from the root
 S3_REGION - Default is us-west-1
 
 CRON_TIME_HOURLY = 0 */1 * * * (every 1 hour)
-CRON_TIME_DAILY = 0 */24 * * * (every 24 hours)
+CRON_TIME_DAILY = 30 */24 * * * (every 24 hours , 30mins past mid night)
 CRON_TIME_WEEKLY = 0 3 * * SUN (3am on SUNDAY)
 CRON_TIME_MONTHLY = 0 4 1 * * (4am on 1st of every month)
 
