@@ -56,7 +56,7 @@ if [[ "$1" == "backup" ]]; then
   # Backup at start up
   if [[ "${INIT_BACKUP}" -gt "0" ]]; then
     echo "Create a backup on the startup"
-    /backup.sh
+    /backup.sh daily
   fi
 
   if [[ -z "$S3_ENDPOINT" ]]; then
@@ -66,13 +66,17 @@ if [[ "$1" == "backup" ]]; then
   fi
 
   # Setup bucket expiration policy
-  if [[ "${S3_LIFECYCLE_EXPIRATION_DAYS}" -gt "0" ]]; then
+  if [[ "${S3_LIFECYCLE_EXPIRATION_DAYS_FOR_HOURLY_BACKUP}" -gt "0" ]]; then
     envsubst < /lifecycle.json.template > /lifecycle.json
     aws $AWS_ARGS s3api put-bucket-lifecycle --bucket $S3_BUCKET --lifecycle-configuration file://lifecycle.json
     aws $AWS_ARGS s3api get-bucket-lifecycle --bucket $S3_BUCKET
   fi
 
-  echo "${CRON_TIME} bash /backup.sh 2>&1 >> /dev/stdout" > /tmp/crontab.conf
+  echo "${CRON_TIME_HOURLY} bash /backup.sh hourly 2>&1 >> /dev/stdout" > /tmp/crontab.conf
+  echo "${CRON_TIME_DAILY} bash /backup.sh daily 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
+  echo "${CRON_TIME_WEEKLY} bash /backup.sh weekly 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
+  echo "${CRON_TIME_MONTHLY} bash /backup.sh monthly 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
+
   crontab /tmp/crontab.conf
   echo "Running cron task manager in foreground"
   exec crond -f -L /dev/stdout

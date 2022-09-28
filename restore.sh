@@ -27,18 +27,32 @@ _s3_key_exists() {
 
 list_s3_top_ten() {
   if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
+    S3_PATH= "s3://$S3_BUCKET"
   else
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
+    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX"
   fi
+
+  if [[ ! -z "$1" ]]; then
+    S3_PATH="$S3_PATH/$1"
+  fi
+
+  echo "Listing top 10 files from $S3_PATH"
+  aws $AWS_ARGS s3 ls $S3_PATH/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
 }
 
 list_s3() {
   if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/ --human-readable
+    S3_PATH= "s3://$S3_BUCKET"
   else
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/ --human-readable
+    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX"
   fi
+
+  if [[ ! -z "$1" ]]; then
+    S3_PATH="$S3_PATH/$1"
+  fi
+
+  echo "Listing all files from $S3_PATH"
+  aws $AWS_ARGS s3 ls $S3_PATH/ --human-readable
 }
 
 restore_db() {
@@ -59,10 +73,10 @@ restore_db() {
   else
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_DIR
   fi
-
-  if [[ -f $RESTORE_DIR/$1 ]]; then
+  RESTORE_FILE=$(basename $1)
+  if [[ -f $RESTORE_DIR/$RESTORE_FILE ]]; then
     echo "${MYSQL_RESTORE_OPTIONS}" > $RESTORE_DIR/options.sql
-    gzip -dkc $RESTORE_DIR/$1 > $RESTORE_DIR/content.sql
+    gzip -dkc $RESTORE_DIR/$RESTORE_FILE > $RESTORE_DIR/content.sql
     cat $RESTORE_DIR/options.sql $RESTORE_DIR/content.sql > $RESTORE_DIR/dump.sql
 
     defaultCollationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@collation_database;")
@@ -84,7 +98,7 @@ restore_db() {
     if [ "$?" == "0" ]; then
       success="0"
     fi
-    rm -rf $RESTORE_DIR/$1 $RESTORE_DIR/dump.sql $RESTORE_DIR/content.sql $RESTORE_DIR/options.sql
+    rm -rf $RESTORE_DIR/$RESTORE_FILE $RESTORE_DIR/dump.sql $RESTORE_DIR/content.sql $RESTORE_DIR/options.sql
   else
     echo "File $1 not exits."
   fi
@@ -118,7 +132,7 @@ restore_mediawiki() {
 }
 
 restore_latest() {
-  restore "latest"
+  restore "latest.hourly"
 }
 
 restore() {
