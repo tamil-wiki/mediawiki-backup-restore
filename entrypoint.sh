@@ -72,17 +72,11 @@ if [[ "$1" == "backup" ]]; then
     aws $AWS_ARGS s3api get-bucket-lifecycle --bucket $S3_BUCKET
   fi
 
-  # CRON_TIME_HOURLY = 0 */1 * * * (every 1 hour)
-  # CRON_TIME_DAILY = 0 */24 * * * (every 24 hours)
-  # CRON_TIME_WEEKLY = 0 3 * * SUN (3am on SUNDAY)
-  # CRON_TIME_MONTHLY = 0 4 1 * * (4am on 1st of every month)
-
-  
   echo "${CRON_TIME_HOURLY} bash /backup.sh hourly 2>&1 >> /dev/stdout" > /tmp/crontab.conf
   echo "${CRON_TIME_DAILY} bash /backup.sh daily 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
   echo "${CRON_TIME_WEEKLY} bash /backup.sh weekly 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
   echo "${CRON_TIME_MONTHLY} bash /backup.sh monthly 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
-  
+
   crontab /tmp/crontab.conf
   echo "Running cron task manager in foreground"
   exec crond -f -L /dev/stdout

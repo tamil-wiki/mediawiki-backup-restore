@@ -49,8 +49,8 @@ CRON_TIME_DAILY = 30 */24 * * * (every 24 hours , 30mins past mid night)
 CRON_TIME_WEEKLY = 0 3 * * SUN (3am on SUNDAY)
 CRON_TIME_MONTHLY = 0 4 1 * * (4am on 1st of every month)
 
-S3_LIFECYCLE_EXPIRATION_DAYS_FOR_HOURLY_BACKUP=1 - retain for 24 hours - 24 copies 
-S3_LIFECYCLE_EXPIRATION_DAYS_FOR_DAILY_BACKUP=7 - retain for 7 days - 7 copies 
+S3_LIFECYCLE_EXPIRATION_DAYS_FOR_HOURLY_BACKUP=1 - retain for 24 hours - 24 copies
+S3_LIFECYCLE_EXPIRATION_DAYS_FOR_DAILY_BACKUP=7 - retain for 7 days - 7 copies
 S3_LIFECYCLE_EXPIRATION_DAYS_FOR_WEEKLY_BACKUP=31 - retain 4 copies (1 month)
 S3_LIFECYCLE_EXPIRATION_DAYS_FOR_MONTHLY_BACKUP=365 - retain 12 copies (1 year)
 
@@ -110,11 +110,11 @@ Restoring Ends at 2022-03-06T155144Z
 
 ```
 
-If you want to restore any other backup from weekly/daily/hourly folders, you can prefix it. 
+If you want to restore any other backup from weekly/daily/hourly folders, you can prefix it.
 
 ```bash
 list_s3 daily
-restore daily/2022-09-27T154250Z.daily 
+restore daily/2022-09-27T154250Z.daily
 ```
 
 ### To validate the restore

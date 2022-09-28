@@ -22,8 +22,6 @@ RUN chmod +x /usr/local/bin/dockerize
 ARG GIT_COMMIT_ID=unspecified
 ENV GIT_COMMIT_ID=$GIT_COMMIT_ID
 
-
-
 ENV CRON_TIME_HOURLY: "0 */1 * * *"
 ENV CRON_TIME_DAILY: "30 */24 * * *"
 ENV CRON_TIME_WEEKLY: "0 3 * * SUN"

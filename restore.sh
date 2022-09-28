@@ -27,27 +27,33 @@ _s3_key_exists() {
 
 list_s3_top_ten() {
   if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
+    S3_PATH= "s3://$S3_BUCKET"
   else
-    aws $AWS_ARGS s3 ls s3://$S3_BUCKET/$S3_PREFIX/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
+    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX"
   fi
+
+  if [[ ! -z "$1" ]]; then
+    S3_PATH="$S3_PATH/$1"
+  fi
+
+  echo "Listing top 10 files from $S3_PATH"
+  aws $AWS_ARGS s3 ls $S3_PATH/$(date +"%Y-%m-%d") --human-readable | sort -r | head -n 10
 }
 
-list_s3() {                                                                                                   
-  if [[ -z "$S3_PREFIX" ]]; then                                                                              
-     S3_PATH= "s3://$S3_BUCKET/"
+list_s3() {
+  if [[ -z "$S3_PREFIX" ]]; then
+    S3_PATH= "s3://$S3_BUCKET"
   else
-    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX/"
+    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX"
   fi
 
-  if [[ -z "$1" ]]; then          
-    S3_PATH="$S3_PATH"
-  else                                                                          
-    S3_PATH="$S3_PATH$1/"
-  fi 
-  echo "Listing files from $S3_PATH" 
-  aws $AWS_ARGS s3 ls $S3_PATH --human-readable                                                                                              
-}  
+  if [[ ! -z "$1" ]]; then
+    S3_PATH="$S3_PATH/$1"
+  fi
+
+  echo "Listing all files from $S3_PATH"
+  aws $AWS_ARGS s3 ls $S3_PATH/ --human-readable
+}
 
 restore_db() {
   mkdir -p $RESTORE_DIR
@@ -66,7 +72,7 @@ restore_db() {
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$1 $RESTORE_DIR
   else
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_DIR
-  fi  
+  fi
   RESTORE_FILE=$(basename $1)
   if [[ -f $RESTORE_DIR/$RESTORE_FILE ]]; then
     echo "${MYSQL_RESTORE_OPTIONS}" > $RESTORE_DIR/options.sql
@@ -119,7 +125,7 @@ restore_mediawiki() {
 
   if [ "$?" == "0" ]; then
     echo "Restoring Mediawiki $1 success!"
-    rm -rf $RESTORE_FILE # for testing 
+    rm -rf $RESTORE_FILE
   else
     echo "Restoring Mediawiki $1 failed"
   fi

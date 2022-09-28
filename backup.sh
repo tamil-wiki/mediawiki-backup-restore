@@ -22,8 +22,8 @@ copy_s3 () {
     aws $AWS_ARGS s3 cp $SRC_FILE s3://$S3_BUCKET/$S3_PREFIX/$FREQUENCY/$DEST_FILE && \
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$FREQUENCY/$DEST_FILE s3://$S3_BUCKET/$S3_PREFIX/$FREQUENCY/$DEST_LATEST_FILE
     if [[ "$FREQUENCY" == "hourly"  ]]; then
-      aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$FREQUENCY/$DEST_FILE s3://$S3_BUCKET/$S3_PREFIX/$DEST_LATEST_FILE    
-    fi    
+      aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$FREQUENCY/$DEST_FILE s3://$S3_BUCKET/$S3_PREFIX/$DEST_LATEST_FILE
+    fi
   fi
   if [ "$?" == "0" ]; then
     rm -f $SRC_FILE
