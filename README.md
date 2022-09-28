@@ -137,3 +137,20 @@ docker-compose run --rm -e "RESTORE_DATABASE=new_my_wiki" -v "/var/www/html:/med
 Refer
 
 docker-compose run --help
+
+## S3 Clean up
+
+While retention policy on s3 is supposed to keep the folders tidy, these commands might help manually remove files when they are not necessary.
+
+```
+bash-5.1# aws $AWS_ARGS s3 rm s3://$S3_BUCKET/wiki/testing/hourly/ --dryrun --recursive --exclude "*" --include "*.gz"
+```
+
+The `--dryrun` flag does not delete files, instead shows what would be deleted. When you are confident about deleting the files listed, you can run the command without the `--dryrun` flag. 
+
+Note : `$AWS_ARGS` is loaded within the backup container. If not run the following manually.
+
+```
+export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
+```
