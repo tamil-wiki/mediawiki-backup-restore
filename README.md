@@ -142,15 +142,20 @@ docker-compose run --help
 
 While retention policy on s3 is supposed to keep the folders tidy, these commands might help manually remove files when they are not necessary.
 
-```
-bash-5.1# aws $AWS_ARGS s3 rm s3://$S3_BUCKET/wiki/testing/hourly/ --dryrun --recursive --exclude "*" --include "*.gz"
-```
-
-The `--dryrun` flag does not delete files, instead shows what would be deleted. When you are confident about deleting the files listed, you can run the command without the `--dryrun` flag. 
-
-Note : `$AWS_ARGS` is loaded within the backup container. If not run the following manually.
+`$AWS_ARGS` is loaded within the backup container. Run the following manually to populate credentials.
 
 ```
 export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
 ```
+
+You can run the following to list and delete files.
+```
+source restore.sh
+list_s3 hourly
+aws $AWS_ARGS s3 rm s3://$S3_BUCKET/wiki/testing/hourly/ --dryrun --recursive --exclude "*" --include "*.gz"
+```
+
+The `--dryrun` flag does not delete files, instead shows what would be deleted. When you are confident about deleting the files listed, you can run the command without the `--dryrun` flag. 
+
+
