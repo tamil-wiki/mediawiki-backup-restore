@@ -30,7 +30,8 @@ ENV S3_PREFIX ""
 ENV S3_REGION "us-west-1"
 ENV S3_SECRET_ACCESS_KEY ""
 ENV TIMEOUT "30s"
-
+ENV DISCORD_NOTIFICATION_URL ""
+ENV CRON_MONITOR_TIME "*/30 * * * *"
 COPY ["entrypoint.sh", "cron_monitor.sh", "/"]
 
 ENTRYPOINT [ "/entrypoint.sh" ]
