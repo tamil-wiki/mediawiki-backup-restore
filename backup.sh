@@ -26,10 +26,11 @@ copy_s3 () {
     fi
   fi
   if [ "$?" == "0" ]; then
-    rm -f $SRC_FILE
+    echo "Successfully uploading ${FREQUENCY} backup file ${DEST_FILE} on S3"
   else
     echo "Error uploading ${FREQUENCY} backup file ${DEST_FILE} on S3"
   fi
+  rm -f $SRC_FILE
 }
 FREQUENCY=$1
 MYSQL_HOST_OPTS="-h $MYSQL_HOST -P $MYSQL_PORT -u$MYSQL_USER -p$MYSQL_PASSWORD"
