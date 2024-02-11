@@ -75,9 +75,13 @@ restore_db() {
   fi
   RESTORE_FILE=$(basename $1)
   if [[ -f $RESTORE_DIR/$RESTORE_FILE ]]; then
-    echo "${MYSQL_RESTORE_OPTIONS}" > $RESTORE_DIR/options.sql
-    gzip -dkc $RESTORE_DIR/$RESTORE_FILE > $RESTORE_DIR/content.sql
-    cat $RESTORE_DIR/options.sql $RESTORE_DIR/content.sql > $RESTORE_DIR/dump.sql
+    echo "Extracting..."
+    gzip -dkc $RESTORE_DIR/$RESTORE_FILE > $RESTORE_DIR/dump.sql
+    echo "The size of the restore file is $(du -hs $RESTORE_DIR/dump.sql | awk '{print $1}')."
+    if [[ ! -z "$MYSQL_RESTORE_OPTIONS" ]]; then
+      echo "Adding restore options..."
+      sed -i "1i${MYSQL_RESTORE_OPTIONS}" $RESTORE_DIR/dump.sql
+    fi
 
     defaultCollationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@collation_database;")
     defaultCharset=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@character_set_database;")
@@ -85,20 +89,22 @@ restore_db() {
     # Replace default collation if utf8mb4_0900_ai_ci is not supported.
     collation0900aiciName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT collation_name FROM information_schema.COLLATIONS WHERE collation_name='utf8mb4_0900_ai_ci';")
     if [[ -z $collation0900aiciName ]]; then
+      echo "Replacing default collation..."
       sed -i "s/utf8mb4_0900_ai_ci/$defaultCollationName/g" $RESTORE_DIR/dump.sql
     fi
 
     # Replace default charset if utf8mb4 is not supported.
     charsetutf8mb4Name=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT character_set_name FROM information_schema.CHARACTER_SETS WHERE character_set_name='utf8mb4';")
     if [[ -z $charsetutf8mb4Name ]]; then
+      echo "Replacing default charset..."
       sed -i "s/CHARSET=utf8mb4/CHARSET=$defaultCharset/g" $RESTORE_DIR/dump.sql
     fi
-
+    echo "Restoring..."
     mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE < $RESTORE_DIR/dump.sql
     if [ "$?" == "0" ]; then
       success="0"
     fi
-    rm -rf $RESTORE_DIR/$RESTORE_FILE $RESTORE_DIR/dump.sql $RESTORE_DIR/content.sql $RESTORE_DIR/options.sql
+    rm -rf $RESTORE_DIR/$RESTORE_FILE $RESTORE_DIR/dump.sql
   else
     echo "File $1 not exits."
   fi
@@ -121,7 +127,8 @@ restore_mediawiki() {
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_FILE
   fi
 
-  tar -xzvf $RESTORE_FILE -C $(dirname $MEDIAWIKI_DIR)
+  echo "Extracting..."
+  tar -xzf $RESTORE_FILE -C $(dirname $MEDIAWIKI_DIR) --show-progress
 
   if [ "$?" == "0" ]; then
     echo "Restoring Mediawiki $1 success!"

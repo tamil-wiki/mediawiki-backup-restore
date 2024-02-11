@@ -32,7 +32,7 @@ copy_s3 () {
   fi
   rm -f $SRC_FILE
 }
-FREQUENCY=$1
+FREQUENCY=${1:-hourly}
 MYSQL_HOST_OPTS="-h $MYSQL_HOST -P $MYSQL_PORT -u$MYSQL_USER -p$MYSQL_PASSWORD"
 DUMP_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
 BACKUP_DIR="/backup"
