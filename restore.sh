@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 # set -x
 # set -e
+set -o pipefail
 
 RESTORE_DIR="/restore"
 MEDIAWIKI_DIR="/mediawiki"
@@ -76,11 +77,11 @@ restore_db() {
   RESTORE_FILE=$(basename $1)
   if [[ -f $RESTORE_DIR/$RESTORE_FILE ]]; then
     echo "Extracting..."
-    gzip -dkc $RESTORE_DIR/$RESTORE_FILE > $RESTORE_DIR/dump.sql
+    gzip -dvkc $RESTORE_DIR/$RESTORE_FILE > $RESTORE_DIR/dump.sql
     echo "The size of the restore file is $(du -hs $RESTORE_DIR/dump.sql | awk '{print $1}')."
     if [[ ! -z "$MYSQL_RESTORE_OPTIONS" ]]; then
       echo "Adding restore options..."
-      sed -i "1i${MYSQL_RESTORE_OPTIONS}" $RESTORE_DIR/dump.sql
+      pv $RESTORE_DIR/dump.sql | sed -i "1i${MYSQL_RESTORE_OPTIONS}"
     fi
 
     defaultCollationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@collation_database;")
@@ -90,7 +91,7 @@ restore_db() {
     collation0900aiciName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT collation_name FROM information_schema.COLLATIONS WHERE collation_name='utf8mb4_0900_ai_ci';")
     if [[ -z $collation0900aiciName ]]; then
       echo "Replacing default collation..."
-      sed -i "s/utf8mb4_0900_ai_ci/$defaultCollationName/g" $RESTORE_DIR/dump.sql
+      pv $RESTORE_DIR/dump.sql | sed -i "s/utf8mb4_0900_ai_ci/$defaultCollationName/g"
     fi
 
     # Replace default charset if utf8mb4 is not supported.
@@ -100,7 +101,7 @@ restore_db() {
       sed -i "s/CHARSET=utf8mb4/CHARSET=$defaultCharset/g" $RESTORE_DIR/dump.sql
     fi
     echo "Restoring..."
-    mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE < $RESTORE_DIR/dump.sql
+    pv $RESTORE_DIR/dump.sql | mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE
     if [ "$?" == "0" ]; then
       success="0"
     fi
@@ -128,7 +129,7 @@ restore_mediawiki() {
   fi
 
   echo "Extracting..."
-  tar -xzf $RESTORE_FILE -C $(dirname $MEDIAWIKI_DIR) --show-progress
+  pv $RESTORE_FILE | tar -xzf - -C $(dirname $MEDIAWIKI_DIR)
 
   if [ "$?" == "0" ]; then
     echo "Restoring Mediawiki $1 success!"
