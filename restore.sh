@@ -5,6 +5,7 @@ set -o pipefail
 
 RESTORE_DIR="/restore"
 MEDIAWIKI_DIR="/mediawiki"
+DONT_CHANGE_DUMP_FILE=${DONT_CHANGE_DUMP_FILE:-true}
 
 if [[ -z "$S3_ENDPOINT" ]]; then
   AWS_ARGS=""
@@ -79,29 +80,33 @@ restore_db() {
     echo "Extracting..."
     gzip -dvkc $RESTORE_DIR/$RESTORE_FILE > $RESTORE_DIR/dump.sql
     echo "The size of the restore file is $(du -hs $RESTORE_DIR/dump.sql | awk '{print $1}')."
-    if [[ ! -z "$MYSQL_RESTORE_OPTIONS" ]]; then
-      echo "Adding restore options..."
-      pv $RESTORE_DIR/dump.sql | sed -i "1i${MYSQL_RESTORE_OPTIONS}"
+
+    if [[ "$DONT_CHANGE_DUMP_FILE" == "false" ]]; then
+      if [[ ! -z "$MYSQL_RESTORE_OPTIONS" ]]; then
+        echo "Adding restore options..."
+        sed -i "1i${MYSQL_RESTORE_OPTIONS}" $RESTORE_DIR/dump.sql
+      fi
+
+      defaultCollationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@collation_database;")
+      defaultCharset=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@character_set_database;")
+
+      # Replace default collation if utf8mb4_0900_ai_ci is not supported.
+      collation0900aiciName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT collation_name FROM information_schema.COLLATIONS WHERE collation_name='utf8mb4_0900_ai_ci';")
+      if [[ -z $collation0900aiciName ]]; then
+        echo "Replacing default collation..."
+        sed -i "s/utf8mb4_0900_ai_ci/$defaultCollationName/g" $RESTORE_DIR/dump.sql
+      fi
+
+      # Replace default charset if utf8mb4 is not supported.
+      charsetutf8mb4Name=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT character_set_name FROM information_schema.CHARACTER_SETS WHERE character_set_name='utf8mb4';")
+      if [[ -z $charsetutf8mb4Name ]]; then
+        echo "Replacing default charset..."
+        sed -i "s/CHARSET=utf8mb4/CHARSET=$defaultCharset/g" $RESTORE_DIR/dump.sql
+      fi
     fi
 
-    defaultCollationName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@collation_database;")
-    defaultCharset=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT @@character_set_database;")
-
-    # Replace default collation if utf8mb4_0900_ai_ci is not supported.
-    collation0900aiciName=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT collation_name FROM information_schema.COLLATIONS WHERE collation_name='utf8mb4_0900_ai_ci';")
-    if [[ -z $collation0900aiciName ]]; then
-      echo "Replacing default collation..."
-      pv $RESTORE_DIR/dump.sql | sed -i "s/utf8mb4_0900_ai_ci/$defaultCollationName/g"
-    fi
-
-    # Replace default charset if utf8mb4 is not supported.
-    charsetutf8mb4Name=$(mysql -s -N $MYSQL_HOST_OPTS $RESTORE_DATABASE -e "SELECT character_set_name FROM information_schema.CHARACTER_SETS WHERE character_set_name='utf8mb4';")
-    if [[ -z $charsetutf8mb4Name ]]; then
-      echo "Replacing default charset..."
-      sed -i "s/CHARSET=utf8mb4/CHARSET=$defaultCharset/g" $RESTORE_DIR/dump.sql
-    fi
     echo "Restoring..."
-    pv $RESTORE_DIR/dump.sql | mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE
+    mysql $MYSQL_HOST_OPTS $RESTORE_DATABASE < $RESTORE_DIR/dump.sql
     if [ "$?" == "0" ]; then
       success="0"
     fi

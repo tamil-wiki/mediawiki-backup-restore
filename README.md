@@ -14,6 +14,7 @@ This docker image will backup the mediawiki database (MySQL based) and config fi
 To start the backup container
 
 ```bash
+docker-compose build wiki-backup
 docker-compose up -d wiki-backup
 ```
 
@@ -65,7 +66,7 @@ This will backup MySQL database and everything in `/mediawiki` mounted folder.
 
 To restore the from s3 backup
 
-```
+```bash
 docker-compose run wiki-backup restore
 ```
 
@@ -91,7 +92,7 @@ RESTORE_DATABASE
 
 The available commands are
 
-```
+```bash
 list_s3_top_ten
 list_s3
 restore <fileName>
@@ -121,7 +122,7 @@ restore daily/2022-09-27T154250Z.daily
 
 Set your S3 credentials in .env file. Then
 
-```
+```bash
 docker-compose up -d db
 docker-compose run --rm -e "RESTORE_DATABASE=my_wiki" wiki-backup restore
 ```
@@ -144,18 +145,17 @@ While retention policy on s3 is supposed to keep the folders tidy, these command
 
 `$AWS_ARGS` is loaded within the backup container. Run the following manually to populate credentials.
 
-```
+```bash
 export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
 ```
 
 You can run the following to list and delete files.
-```
+
+```bash
 source restore.sh
 list_s3 hourly
 aws $AWS_ARGS s3 rm s3://$S3_BUCKET/wiki/testing/hourly/ --dryrun --recursive --exclude "*" --include "*.gz"
 ```
 
-The `--dryrun` flag does not delete files, instead shows what would be deleted. When you are confident about deleting the files listed, you can run the command without the `--dryrun` flag. 
-
-
+The `--dryrun` flag does not delete files, instead shows what would be deleted. When you are confident about deleting the files listed, you can run the command without the `--dryrun` flag.

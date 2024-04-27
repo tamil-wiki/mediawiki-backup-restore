@@ -12,8 +12,8 @@ RUN apk add --no-cache --update \
       py3-pip \
       gettext \
       aws-cli \
-      pv && \
-      # mariadb-connector-c && \
+      pv \
+      mariadb-connector-c-dev && \
       rm -rf /var/cache/apk/*
 
 RUN curl -L --insecure https://github.com/jwilder/dockerize/releases/download/v0.7.0/dockerize-alpine-linux-amd64-v0.7.0.tar.gz | tar -xz -C /usr/local/bin/
