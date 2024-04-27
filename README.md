@@ -14,8 +14,8 @@ This docker image will backup the mediawiki database (MySQL based) and config fi
 To start the backup container
 
 ```bash
-docker-compose build wiki-backup
-docker-compose up -d wiki-backup
+docker-compose build backup
+docker-compose up -d backup
 ```
 
 The **required environmental** variables are
@@ -67,14 +67,14 @@ This will backup MySQL database and everything in `/mediawiki` mounted folder.
 To restore the from s3 backup
 
 ```bash
-docker-compose run wiki-backup restore
+docker-compose run backup restore
 ```
 
 Then you will entered into a shell. By default it will display the latest 10 backup files like below
 
 ```bash
-docker-compose run --rm wiki-backup restore
-Creating mediawiki-backup-restore_wiki-backup_run ... done
+docker-compose run --rm backup restore
+Creating mediawiki-backup-restore_backup_run ... done
 2022/03/06 15:39:13 Waiting for: tcp://db:3306
 2022/03/06 15:39:13 Connected to tcp://db:3306
 2022-03-06 07:50:04  440 Bytes 2022-03-06T075000Z.dump.sql.gz
@@ -124,7 +124,7 @@ Set your S3 credentials in .env file. Then
 
 ```bash
 docker-compose up -d db
-docker-compose run --rm -e "RESTORE_DATABASE=my_wiki" wiki-backup restore
+docker-compose run --rm -e "RESTORE_DATABASE=my_wiki" backup restore
 ```
 
 Then exec into the restore container
@@ -132,7 +132,7 @@ Then exec into the restore container
 ### To override anything on restore
 
 ```bash
-docker-compose run --rm -e "RESTORE_DATABASE=new_my_wiki" -v "/var/www/html:/mediawiki" wiki-backup restore
+docker-compose run --rm -e "RESTORE_DATABASE=new_my_wiki" -v "/var/www/html:/mediawiki" backup restore
 ```
 
 Refer
