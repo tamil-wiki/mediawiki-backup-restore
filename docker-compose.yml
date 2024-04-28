@@ -34,7 +34,7 @@ services:
       - mysqldb-data:/var/lib/mysql
     restart: on-failure
 
-  wiki-backup:
+  backup:
     <<: *default
     build:
       context: .
@@ -42,7 +42,7 @@ services:
         # GIT_COMMIT load from .envrc via direnv
         GIT_COMMIT_ID: ${GIT_COMMIT:-unspecified}
     image: tamilwiki/mediawiki_backup_restore:dev
-    environment:            
+    environment:
       INIT_BACKUP: 1
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}

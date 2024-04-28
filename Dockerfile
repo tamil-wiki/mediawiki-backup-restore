@@ -1,4 +1,4 @@
-FROM alpine:3.15.0
+FROM alpine:3.19.1
 LABEL maintainer "Arulraj V <me@arulraj.net>"
 
 RUN apk add --no-cache --update \
@@ -10,13 +10,13 @@ RUN apk add --no-cache --update \
       curl \
       python3 \
       py3-pip \
-      gettext && \
-      pip3 install --no-cache-dir \
-      awscli && \
-      # mariadb-connector-c && \
+      gettext \
+      aws-cli \
+      pv \
+      mariadb-connector-c-dev && \
       rm -rf /var/cache/apk/*
 
-RUN curl -L --insecure https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-alpine-linux-amd64-v0.6.1.tar.gz | tar -xz -C /usr/local/bin/
+RUN curl -L --insecure https://github.com/jwilder/dockerize/releases/download/v0.7.0/dockerize-alpine-linux-amd64-v0.7.0.tar.gz | tar -xz -C /usr/local/bin/
 RUN chmod +x /usr/local/bin/dockerize
 
 ARG GIT_COMMIT_ID=unspecified
