@@ -51,7 +51,7 @@ sql_backup_delayed=$(echo "$hours_since_sql_dump > $minimum_backup_time_requirem
 
 # if not, notify 
 if [[ $((mediawiki_backup_delayed + sql_backup_delayed)) > 0 ]] ; then 
-    curl -X POST $DISCORD_NOTIFICATION_URL -H 'Content-Type: application/json' -d '{"embeds":[{"color":"14365807","title":"MediaWiki Backup","type":"rich","description":"Backup Cron Testing","fields":[{"name":"Mediawiki Backup Time","value":"'"$hours_since_mediawiki_dump hours ago"'"},{"name":"DB Bakup Time","value":"'"$hours_since_sql_dump hours ago"'"},{"name":"frequency","value":"hourly"},{"name":"S3 Bucket","value":"'"$S3_PREFIX"'"}]}]}'
+    curl -X POST $DISCORD_NOTIFICATION_URL -H 'Content-Type: application/json' -d '{"embeds":[{"color":"14365807","title":"MediaWiki Backup","type":"rich","description":"Hourly Backup Failed","fields":[{"name":"Mediawiki Backup Time","value":"'"$hours_since_mediawiki_dump hours ago"'"},{"name":"DB Bakup Time","value":"'"$hours_since_sql_dump hours ago"'"},{"name":"frequency","value":"hourly"},{"name":"S3 Bucket","value":"'"$S3_PREFIX"'"}]}]}'
     echo "Notified the delay in backup cron"
 else 
     echo "No delay in hourly backup. Hence, no notification sent."
