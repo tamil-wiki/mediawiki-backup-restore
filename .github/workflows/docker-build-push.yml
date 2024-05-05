@@ -39,8 +39,7 @@ jobs:
       -
         name: Build and push Docker image for backup
         uses: docker/build-push-action@v2
-        with:
-          context: .                
+        with:                        
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
