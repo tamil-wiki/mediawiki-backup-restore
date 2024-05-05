@@ -12,6 +12,16 @@ jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfiles:
+          - context: .
+            dockerfile: ./Dockerfile
+            image: tamilwiki/mediawiki_backup_restore            
+          - context: ./monitor
+            dockerfile: ./monitor/Dockerfile          
+            image: tamilwiki/mediawiki_backup_monitor            
     steps:
       -
         name: Check out the repo
@@ -27,12 +37,14 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: tamilwiki/mediawiki_backup_restore
+          images: ${{ matrix.dockerfiles.image }}
       -
-        name: Build and push Docker image
+        name: Build and push Docker image for backup
         uses: docker/build-push-action@v2
-        with:
-          context: .
+        with:                        
+          file: ${{ matrix.dockerfiles.dockerfile }}
+          context: ${{ matrix.dockerfiles.context }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          
