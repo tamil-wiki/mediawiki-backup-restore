@@ -27,9 +27,9 @@ list_s3() {
   echo "Listing all files from $S3_PATH"
   aws $AWS_ARGS s3 ls $S3_PATH/ --human-readable
 }
-s3_latest_mediawiki_dump_backup_record=$(list_s3 hourly | tail -1) 
+s3_latest_mediawiki_dump_backup_record=$(list_s3 hourly | grep "mediawiki" | tail -1) 
 echo "Latest mediawiki dump record: $s3_latest_mediawiki_dump_backup_record"
-s3_latest_sql_dump_backup_record=$(list_s3 hourly | tail -2 | head -1) 
+s3_latest_sql_dump_backup_record=$(list_s3 hourly | grep "sql" | tail -1) 
 echo "Latest sql dump record: $s3_latest_sql_dump_backup_record"
 
 t1=$(echo $s3_latest_mediawiki_dump_backup_record | awk '{print substr($0,1,19)}')
