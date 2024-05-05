@@ -16,12 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./Dockerfile
-            image: tamilwiki/mediawiki_backup_restore
-            context: .
-          - dockerfile: ./monitor/Dockerfile
-            image: tamilwiki/mediawiki_backup_monitor
-            context: ./monitor
+          - path: .
+            image: tamilwiki/mediawiki_backup_restore            
+          - path: ./monitor
+            image: tamilwiki/mediawiki_backup_monitor            
     steps:
       -
         name: Check out the repo
@@ -47,3 +45,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          run: ls -l 
