@@ -18,8 +18,10 @@ jobs:
         include:
           - dockerfile: ./Dockerfile
             image: tamilwiki/mediawiki_backup_restore
+            context: .
           - dockerfile: ./monitor/Dockerfile
             image: tamilwiki/mediawiki_backup_monitor
+            context: ./monitor
     steps:
       -
         name: Check out the repo
@@ -45,4 +47,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          
