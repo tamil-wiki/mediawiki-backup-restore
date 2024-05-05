@@ -14,10 +14,10 @@ else
 fi
 
 list_s3() {
-  if [[ -z "$S3_PREFIX" ]]; then
+  if [[ -z "$S3_PREFIX_FOR_MONITORING" ]]; then
     S3_PATH= "s3://$S3_BUCKET"
   else
-    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX"
+    S3_PATH="s3://$S3_BUCKET/$S3_PREFIX_FOR_MONITORING"
   fi
 
   if [[ ! -z "$1" ]]; then
@@ -113,7 +113,7 @@ if [ "$notify" = "true" ] ; then
           "value":"hourly"
           },{
           "name":"S3 Bucket",
-          "value":"'"$S3_PREFIX"'"
+          "value":"'"$S3_PREFIX_FOR_MONITORING"'"
         }]}]}'
     echo "Notification sent: $result"
 else 

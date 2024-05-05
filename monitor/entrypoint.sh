@@ -18,6 +18,16 @@ if [[ -z "${S3_BUCKET}" ]];then
   exit 1
 fi
 
+if [[ -z "${S3_PREFIX_FOR_MONITORING}" ]];then
+  echo "The S3_PREFIX_FOR_MONITORING env can't be empty."
+  exit 1
+fi
+
+if [[ -z "${DISCORD_NOTIFICATION_URL}" ]];then
+  echo "The DISCORD_NOTIFICATION_URL env can't be empty."
+  exit 1
+fi
+
 # env files needed for aws cli
 export AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
