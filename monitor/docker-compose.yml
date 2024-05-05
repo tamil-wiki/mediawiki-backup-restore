@@ -15,7 +15,7 @@ x-default: &default
 
 services:
 
-  monitor:
+  mediawiki_backup_monitor:
     <<: *default
     image: tamilwiki/mediawiki_backup_monitor:${MONITOR_DOCKER_IMAGE_VERSION}
     build:
