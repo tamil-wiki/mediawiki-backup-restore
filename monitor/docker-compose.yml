@@ -17,7 +17,7 @@ services:
 
   monitor:
     <<: *default
-    image: tamilwiki/monitor:${MONITOR_DOCKER_IMAGE_VERSION}
+    image: tamilwiki/mediawiki_backup_monitor:${MONITOR_DOCKER_IMAGE_VERSION}
     restart: on-failure
     mem_limit: 128M
     mem_reservation: 64M    
@@ -30,5 +30,7 @@ services:
       S3_LIFECYCLE_EXPIRATION_DAYS: ${S3_LIFECYCLE_EXPIRATION_DAYS}
       S3_PREFIX: ${S3_PREFIX}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+    volumes:
+      ./alert:/alert
     networks:
       - default
