@@ -47,6 +47,10 @@ services:
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_PORT: ${MYSQL_PORT}
+      SCHEDULE_BACKUP_HOURLY: ${SCHEDULE_BACKUP_HOURLY} 
+      SCHEDULE_BACKUP_DAILY: ${SCHEDULE_BACKUP_DAILY} 
+      SCHEDULE_BACKUP_WEEKLY: ${SCHEDULE_BACKUP_WEEKLY} 
+      SCHEDULE_BACKUP_MONTHLY: ${SCHEDULE_BACKUP_MONTHLY} 
       # The content in this env append while restoring the SQL file.
       # Some older MySQL Server needs extra options has to be enabled.
       MYSQL_RESTORE_OPTIONS: ""
