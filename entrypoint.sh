@@ -72,13 +72,29 @@ if [[ "$1" == "backup" ]]; then
     aws $AWS_ARGS s3api get-bucket-lifecycle --bucket $S3_BUCKET
   fi
 
-  echo "${CRON_TIME_HOURLY} bash /backup.sh hourly 2>&1 >> /dev/stdout" > /tmp/crontab.conf
-  echo "${CRON_TIME_DAILY} bash /backup.sh daily 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
-  echo "${CRON_TIME_WEEKLY} bash /backup.sh weekly 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
-  echo "${CRON_TIME_MONTHLY} bash /backup.sh monthly 2>&1 >> /dev/stdout" >> /tmp/crontab.conf
+  CRON_FILE="/tmp/crontab.conf"
+  > "$CRON_FILE" # to clear the file 
 
-  crontab /tmp/crontab.conf
+  # Add cron jobs based on user choice in env file
+  if [ "${SCHEDULE_BACKUP_HOURLY}" = "true" ]; then
+    echo "${CRON_TIME_HOURLY} bash /backup.sh hourly 2>&1 >> /dev/stdout" >> "$CRON_FILE"
+  fi
+
+  if [ "${SCHEDULE_BACKUP_DAILY}" = "true" ]; then
+    echo "${CRON_TIME_DAILY} bash /backup.sh daily 2>&1 >> /dev/stdout" >> "$CRON_FILE"
+  fi
+
+  if [ "${SCHEDULE_BACKUP_WEEKLY}" = "true" ]; then
+    echo "${CRON_TIME_WEEKLY} bash /backup.sh weekly 2>&1 >> /dev/stdout" >> "$CRON_FILE"
+  fi
+
+  if [ "${SCHEDULE_BACKUP_MONTHLY}" = "true" ]; then
+    echo "${CRON_TIME_MONTHLY} bash /backup.sh monthly 2>&1 >> /dev/stdout" >> "$CRON_FILE"
+  fi
+  crontab $CRON_FILE
   echo "Running cron task manager in foreground"
+  echo "cron configuration"
+  crontab -l
   exec crond -f -L /dev/stdout
 elif [[ "$1" == "restore" ]]; then
 
