@@ -23,8 +23,8 @@ ARG GIT_COMMIT_ID=unspecified
 ENV GIT_COMMIT_ID=$GIT_COMMIT_ID
 
 # Target frequencies needed. Make them true from docker compose. 
-
-ENV SCHEDULE_BACKUP_HOURLY "false"
+# default hourly will be true
+ENV SCHEDULE_BACKUP_HOURLY "true"
 ENV SCHEDULE_BACKUP_DAILY "false"
 ENV SCHEDULE_BACKUP_WEEKLY "false"
 ENV SCHEDULE_BACKUP_MONTHLY "false"
