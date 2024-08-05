@@ -1,0 +1,37 @@
+version: '2.4'
+
+networks:
+  # This networks defined in main yaml docker-compose.yml file
+  # Since both are refering common project the network defined here will refer the same.
+  default:
+    ipam:
+      driver: default
+
+# YAML aliases
+x-default: &default
+  dns:
+    - 1.1.1.1
+    - 1.0.0.1
+
+services:
+
+  mediawiki_backup_monitor:
+    <<: *default
+    image: tamilwiki/mediawiki_backup_monitor:${MONITOR_DOCKER_IMAGE_VERSION}
+    build:
+      context: .
+    restart: on-failure
+    mem_limit: 128M
+    mem_reservation: 64M    
+    environment:
+      DISCORD_NOTIFICATION_URL: ${DISCORD_NOTIFICATION_URL}
+      CRON_MONITOR_TIME: ${CRON_MONITOR_TIME}      
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ENDPOINT: ${S3_ENDPOINT}      
+      S3_PREFIX_FOR_MONITORING: ${S3_PREFIX_FOR_MONITORING}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+    volumes:
+      - ./alert:/alert
+    networks:
+      - default
