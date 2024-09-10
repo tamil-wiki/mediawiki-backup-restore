@@ -157,7 +157,7 @@ restore() {
   db_backup_fileName=$1
   mediawiki_backup_fileName=$2
   
-  if [[ -z "$1" ] || [ -z "$2" ]]; then
+  if [[ -z "$1"  || -z "$2" ]]; then
     logger "Please provide both database and mediawiki backup file names"
   fi
     
