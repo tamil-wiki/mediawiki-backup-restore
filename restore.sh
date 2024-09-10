@@ -149,7 +149,7 @@ restore_mediawiki() {
 }
 
 restore_latest() {
-  restore "latest.hourly" "latest.hourly"
+  restore "latest.hourly.dump.sql.gz" "latest.hourly.mediawiki.tar.gz"
 }
 
 restore() {
@@ -159,6 +159,7 @@ restore() {
   
   if [[ -z "$1"  || -z "$2" ]]; then
     logger "Please provide both database and mediawiki backup file names"
+    return 1
   fi
     
   RESTORE_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
