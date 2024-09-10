@@ -149,17 +149,23 @@ restore_mediawiki() {
 }
 
 restore_latest() {
-  restore "latest.hourly"
+  restore "latest.hourly" "latest.hourly"
 }
 
 restore() {
   # The fileName will be without extensions like 2022-03-06T075000Z or latest
-  fileName=$1
+  db_backup_fileName=$1
+  mediawiki_backup_fileName=$2
+  
+  if [[ -z "$1" ] || [ -z "$2" ]]; then
+    logger "Please provide both database and mediawiki backup file names"
+  fi
+    
   RESTORE_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
   logger "Restoring Started at $RESTORE_START_TIME"
 
   # Restoring DB
-  SQL_DUMP_FILE="$fileName.dump.sql.gz"
+  SQL_DUMP_FILE="$db_backup_fileName"
   if [[ "$(_s3_key_exists $SQL_DUMP_FILE)" != "0" ]]; then
     logger "The given dump ${SQL_DUMP_FILE} file is does not exists."
     return 1
@@ -168,7 +174,7 @@ restore() {
 
   # Restoring mediawiki
   if [ -d $MEDIAWIKI_DIR ]; then
-    WIKI_DUMP_FILE="$fileName.mediawiki.tar.gz"
+    WIKI_DUMP_FILE="$mediawiki_backup_fileName"
     if [[ "$(_s3_key_exists $WIKI_DUMP_FILE)" != "0" ]]; then
       logger "The given mediawiki ${WIKI_DUMP_FILE} file is does not exists."
       return 1
