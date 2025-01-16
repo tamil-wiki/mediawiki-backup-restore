@@ -47,7 +47,7 @@ echo "Hours since mediawiki Dump: $hours_since_mediawiki_dump"
 echo "Hours since sql Dump: $hours_since_sql_dump"
 
 # check if the backup is within the required timeframe 
-minimum_backup_time_requirement=1.5 
+minimum_backup_time_requirement=$EXPECTED_BACKUP_TIMELAG
 mediawiki_backup_delayed=$(echo "$hours_since_mediawiki_dump > $minimum_backup_time_requirement" |bc -l)
 sql_backup_delayed=$(echo "$hours_since_sql_dump > $minimum_backup_time_requirement" |bc -l)
 
