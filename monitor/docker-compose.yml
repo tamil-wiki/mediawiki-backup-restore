@@ -31,6 +31,7 @@ services:
       S3_ENDPOINT: ${S3_ENDPOINT}      
       S3_PREFIX_FOR_MONITORING: ${S3_PREFIX_FOR_MONITORING}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      EXPECTED_BACKUP_TIMELAG: ${EXPECTED_BACKUP_TIMELAG}
     volumes:
       - ./alert:/alert
     networks:
