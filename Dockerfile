@@ -13,6 +13,7 @@ RUN apk add --no-cache --update \
       gettext \
       aws-cli \
       pv \
+      tar \
       mariadb-connector-c-dev && \
       rm -rf /var/cache/apk/*
 
@@ -46,6 +47,7 @@ ENV MYSQL_USER "root"
 ENV MYSQLDUMP_DATABASE "my_wiki"
 ENV MYSQLDUMP_OPTIONS ""
 ENV RESTORE_DATABASE ""
+ENV RESTORE_SKIP_THUMBS "false"
 ENV S3_ACCESS_KEY_ID ""
 ENV S3_BUCKET ""
 ENV S3_ENDPOINT ""
