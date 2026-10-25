@@ -17,12 +17,13 @@ logger() {
   echo $(date +"%Y-%m-%dT%H%M%SZ") "$@"
 }
 
-# Validate the given file exists in S3
+# Validate the given file exists in S3. Prints 0 when it exists, 1 otherwise.
 _s3_key_exists() {
+  local not_exists=""
   if [[ -z "$S3_PREFIX" ]]; then
-    aws $AWS_ARGS s3api head-object --bucket $S3_BUCKET --key $1 > /dev/null || not_exists=true
+    aws $AWS_ARGS s3api head-object --bucket $S3_BUCKET --key $1 > /dev/null 2>&1 || not_exists=true
   else
-    aws $AWS_ARGS s3api head-object --bucket $S3_BUCKET --key $S3_PREFIX/$1 > /dev/null || not_exists=true
+    aws $AWS_ARGS s3api head-object --bucket $S3_BUCKET --key $S3_PREFIX/$1 > /dev/null 2>&1 || not_exists=true
   fi
   if [ $not_exists ]; then
     echo 1
@@ -33,7 +34,7 @@ _s3_key_exists() {
 
 list_s3_top_ten() {
   if [[ -z "$S3_PREFIX" ]]; then
-    S3_PATH= "s3://$S3_BUCKET"
+    S3_PATH="s3://$S3_BUCKET"
   else
     S3_PATH="s3://$S3_BUCKET/$S3_PREFIX"
   fi
@@ -48,7 +49,7 @@ list_s3_top_ten() {
 
 list_s3() {
   if [[ -z "$S3_PREFIX" ]]; then
-    S3_PATH= "s3://$S3_BUCKET"
+    S3_PATH="s3://$S3_BUCKET"
   else
     S3_PATH="s3://$S3_BUCKET/$S3_PREFIX"
   fi
@@ -148,38 +149,67 @@ restore_mediawiki() {
   rm -rf $RESTORE_FILE
 }
 
+# Restore the latest hourly DB dump and mediawiki archive.
 restore_latest() {
-  restore "latest.hourly.dump.sql.gz" "latest.hourly.mediawiki.tar.gz"
+  restore "latest.hourly"
 }
 
+# Restore a DB dump and a mediawiki archive from S3.
+#
+# Usage:
+#   restore <name>
+#     <name> has no extension, e.g. 2022-03-06T075000Z, latest.hourly or
+#     daily/2022-09-27T154250Z.daily. It expands to <name>.dump.sql.gz and
+#     <name>.mediawiki.tar.gz. The DB dump must exist. If the mediawiki
+#     archive is missing (e.g. IMAGE_BACKUP_REQUIRED=false at backup time),
+#     a warning is logged and only the DB is restored.
+#
+#   restore <db file> <mediawiki file>
+#     Full file names, used when the DB and images were backed up separately,
+#     e.g. restore hourly/2024-01-01T100000Z.hourly.dump.sql.gz \
+#                  daily/2024-01-01T003000Z.daily.mediawiki.tar.gz
+#     Both files must exist, otherwise nothing is restored.
 restore() {
-  # The fileName will be without extensions like 2022-03-06T075000Z or latest
-  db_backup_fileName=$1
-  mediawiki_backup_fileName=$2
-  
-  if [[ -z "$1"  || -z "$2" ]]; then
-    logger "Please provide both database and mediawiki backup file names"
+  local SQL_DUMP_FILE WIKI_DUMP_FILE
+  local wiki_required="false"
+
+  if [[ $# -eq 1 && -n "$1" ]]; then
+    SQL_DUMP_FILE="$1.dump.sql.gz"
+    WIKI_DUMP_FILE="$1.mediawiki.tar.gz"
+  elif [[ $# -eq 2 && -n "$1" && -n "$2" ]]; then
+    SQL_DUMP_FILE="$1"
+    WIKI_DUMP_FILE="$2"
+    wiki_required="true"
+  else
+    logger "Usage: restore <name> | restore <db file> <mediawiki file>"
     return 1
   fi
-    
+
+  # Validate every file before restoring anything, so a missing file never
+  # leaves a half restored wiki (new DB with old images or the reverse).
+  if [[ "$(_s3_key_exists $SQL_DUMP_FILE)" != "0" ]]; then
+    logger "The given dump ${SQL_DUMP_FILE} file does not exist."
+    return 1
+  fi
+
+  if [ ! -d $MEDIAWIKI_DIR ]; then
+    logger "Warning: $MEDIAWIKI_DIR is not mounted, skipping mediawiki restore."
+    WIKI_DUMP_FILE=""
+  elif [[ "$(_s3_key_exists $WIKI_DUMP_FILE)" != "0" ]]; then
+    if [[ "$wiki_required" == "true" ]]; then
+      logger "The given mediawiki ${WIKI_DUMP_FILE} file does not exist."
+      return 1
+    fi
+    logger "Warning: mediawiki ${WIKI_DUMP_FILE} file does not exist, restoring the DB only."
+    WIKI_DUMP_FILE=""
+  fi
+
   RESTORE_START_TIME=$(date +"%Y-%m-%dT%H%M%SZ")
   logger "Restoring Started at $RESTORE_START_TIME"
 
-  # Restoring DB
-  SQL_DUMP_FILE="$db_backup_fileName"
-  if [[ "$(_s3_key_exists $SQL_DUMP_FILE)" != "0" ]]; then
-    logger "The given dump ${SQL_DUMP_FILE} file is does not exists."
-    return 1
-  fi
   restore_db $SQL_DUMP_FILE
 
-  # Restoring mediawiki
-  if [ -d $MEDIAWIKI_DIR ]; then
-    WIKI_DUMP_FILE="$mediawiki_backup_fileName"
-    if [[ "$(_s3_key_exists $WIKI_DUMP_FILE)" != "0" ]]; then
-      logger "The given mediawiki ${WIKI_DUMP_FILE} file is does not exists."
-      return 1
-    fi
+  if [[ -n "$WIKI_DUMP_FILE" ]]; then
     restore_mediawiki $WIKI_DUMP_FILE
   fi
 
