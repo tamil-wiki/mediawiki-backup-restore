@@ -57,6 +57,12 @@ S3_LIFECYCLE_EXPIRATION_DAYS_FOR_MONTHLY_BACKUP=365 - retain 12 copies (1 year)
 
 INIT_BACKUP - To run backup at startup. Default is 0 disabled.
 
+DB_BACKUP_REQUIRED - Back up the MySQL database. Default is `true`.
+
+IMAGE_BACKUP_REQUIRED - Back up the `/mediawiki` folder (uploaded images etc.). Default is `true`.
+
+Set one of them to `false` to run the DB and the image backups separately, for example from two containers with different schedules. A backup run exits non-zero when `mysqldump`, compression or the S3 upload fails.
+
 S3_LIFECYCLE_EXPIRATION_DAYS - To set the s3 lifecycle expiration days. Default is 0 disabled. More [info](https://docs.aws.amazon.com/cli/latest/reference/s3api/put-bucket-lifecycle.html)
 
 
@@ -95,10 +101,13 @@ The available commands are
 ```bash
 list_s3_top_ten
 list_s3
-restore <fileName>
+restore <name>
+restore <db file> <mediawiki file>
 ```
 
-The fileName will be without extensions like 2022-03-06T075000Z or latest
+`restore <name>` takes a name without extensions, like `2022-03-06T075000Z` or `latest.hourly`. It restores `<name>.dump.sql.gz` and `<name>.mediawiki.tar.gz`. The DB dump must exist. If the mediawiki archive is missing (for example it was backed up with `IMAGE_BACKUP_REQUIRED=false`), it logs a warning and restores only the DB.
+
+`restore <db file> <mediawiki file>` takes two full file names, for when the DB and images were backed up separately. Both files must exist, otherwise nothing is restored.
 
 For example
 
@@ -116,6 +125,12 @@ If you want to restore any other backup from weekly/daily/hourly folders, you ca
 ```bash
 list_s3 daily
 restore daily/2022-09-27T154250Z.daily
+```
+
+To restore a DB and images taken at different times
+
+```bash
+restore hourly/2024-01-01T100000Z.hourly.dump.sql.gz daily/2024-01-01T003000Z.daily.mediawiki.tar.gz
 ```
 
 ### To validate the restore

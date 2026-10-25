@@ -29,6 +29,11 @@ ENV SCHEDULE_BACKUP_DAILY "false"
 ENV SCHEDULE_BACKUP_WEEKLY "false"
 ENV SCHEDULE_BACKUP_MONTHLY "false"
 
+# What to back up. Both on by default; set one to "false" to back up the
+# DB and the /mediawiki folder separately.
+ENV DB_BACKUP_REQUIRED "true"
+ENV IMAGE_BACKUP_REQUIRED "true"
+
 # Target date & time 
 ENV CRON_TIME_HOURLY "0 */1 * * *"
 ENV CRON_TIME_DAILY "30 */24 * * *"
