@@ -138,8 +138,16 @@ restore_mediawiki() {
     aws $AWS_ARGS s3 cp s3://$S3_BUCKET/$S3_PREFIX/$1 $RESTORE_FILE
   fi
 
+  TAR_EXCLUDES=()
+  if [[ "$RESTORE_SKIP_THUMBS" == "true" ]]; then
+    # MediaWiki recreates a thumbnail when a page using it is re-rendered,
+    # so flush the parser cache after restoring without thumbs.
+    logger "Skipping $(basename $MEDIAWIKI_DIR)/images/thumb (RESTORE_SKIP_THUMBS=true)."
+    TAR_EXCLUDES+=("--exclude=$(basename $MEDIAWIKI_DIR)/images/thumb")
+  fi
+
   logger "Extracting..."
-  pv $RESTORE_FILE | tar -xzf - -C $(dirname $MEDIAWIKI_DIR)
+  pv $RESTORE_FILE | tar -xzf - "${TAR_EXCLUDES[@]}" -C $(dirname $MEDIAWIKI_DIR)
 
   if [ "$?" == "0" ]; then
     logger "Restoring Mediawiki $1 success!"

@@ -94,6 +94,10 @@ The required env with above is
 
 RESTORE_DATABASE
 
+**Optional** restore env
+
+RESTORE_SKIP_THUMBS - Default `false`. Set `true` to skip `images/thumb` while extracting the mediawiki backup. Backups always include thumbnails. MediaWiki recreates a thumbnail when a page using it is re-rendered, so clear the parser cache (for example, flush Redis) after a restore without thumbnails. Pages already in the parser cache keep pointing at missing thumbnails until they are re-rendered.
+
 ### Commands
 
 The available commands are
